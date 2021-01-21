@@ -1,50 +1,24 @@
-const { ApolloServer } = require('apollo-server')
-const gql = require('graphql-tag')
-const mongoose = require('mongoose')
+const { ApolloServer } = require("apollo-server");
+const mongoose = require("mongoose");
 
-const { MONGODB } = require('./config.js');
-const post = require('./models/post.js');
-
-// creates 
-const typeDefs = gql`
-    type Post {
-        id: ID!
-        body: String!
-        createdAt: String!
-        username: String!
-    }
-    type Query{
-      getPosts: [Post]
-    }
-`;
-
-const resolvers = {
-    Query: {
-      async getPosts(){
-        try{
-          const posts = await post.find();
-          return posts;
-        } catch (err){
-          throw new Error(err);
-        }
-      }
-    }
-}
+const typeDefs = require("./graphql/typeDefs");
+const { MONGODB } = require("./config.js");
+const resolvers = require("./graphql/resolvers");
 
 mongoose
-    .connect(MONGODB, 
-        { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => {
-        console.log('MONGODB Connected')
-        return server.listen({ port: 5000 })
-    })
-    .then((res) => {
-        console.log(`Server running at ${res.url}`)
-    })
+  .connect(MONGODB, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("MONGODB Connected");
+    return server.listen({ port: 5000 });
+  })
+  .then((res) => {
+    console.log(`Server running at ${res.url}`);
+  });
 
 //set up Apollo server
 
-const server = new ApolloServer ( {
-    typeDefs,
-    resolvers
-})
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({ req })
+});
